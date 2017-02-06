@@ -179,7 +179,7 @@ rides[:24*10].plot(x='dteday', y='cnt')
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x262637a1c18>
+    <matplotlib.axes._subplots.AxesSubplot at 0x22c93af7b70>
 
 
 
@@ -464,17 +464,15 @@ class NeuralNetwork(object):
         # Output layer error is the difference between desired target and actual output.
         output_errors = targets - final_outputs
         
-        
         # TODO: Backpropagated error
         # errors propagated to the hidden layer
-        hidden_errors = output_errors * self.weights_hidden_to_output * hidden_outputs.transpose() * (1 - hidden_outputs).transpose()
+        hidden_errors = output_errors * self.weights_hidden_to_output
+        hidden_grad = hidden_outputs.transpose() * (1 - hidden_outputs).transpose()
         
-        input_to_hidden_grad = self.lr * hidden_errors * inputs # hidden layer gradients
-        hidden_to_output_grad = self.lr * output_errors * hidden_outputs.transpose()
         
         # TODO: Update the weights
-        self.weights_hidden_to_output += hidden_to_output_grad # update hidden-to-output weights with gradient descent step
-        self.weights_input_to_hidden += input_to_hidden_grad.transpose() # update input-to-hidden weights with gradient descent step
+        self.weights_hidden_to_output += self.lr * output_errors * hidden_outputs.transpose() # update hidden-to-output weights with gradient descent step
+        self.weights_input_to_hidden += (self.lr * hidden_errors * hidden_grad * inputs).transpose() # update input-to-hidden weights with gradient descent step
  
         
     def run(self, inputs_list):
@@ -520,9 +518,9 @@ The more hidden nodes you have, the more accurate predictions the model will mak
 import sys
 
 ### Set the hyperparameters here ###
-epochs = 750
-learning_rate = 0.025
-hidden_nodes = 3
+epochs = 350
+learning_rate = 0.1
+hidden_nodes = 10
 output_nodes = 1
 
 N_i = train_features.shape[1]
@@ -547,7 +545,7 @@ for e in range(epochs):
     losses['validation'].append(val_loss)
 ```
 
-    Progress: 99.8% ... Training loss: 0.115 ... Validation loss: 0.236
+    Progress: 99.7% ... Training loss: 0.080 ... Validation loss: 0.185
 
 
 ```python
@@ -560,7 +558,7 @@ plt.ylim(ymax=0.5)
 
 
 
-    (0.046465724699745317, 0.5)
+    (0.015228194137719663, 0.5)
 
 
 
@@ -600,7 +598,8 @@ Answer these questions about your results. How well does the model predict the d
 > **Note:** You can edit the text in this cell by double clicking on it. When you want to render the text, press control + enter
 
 #### Your answer below
-It overestimates during holiday seasons, it is very likely that since it is a very special date, rides are much lower than average, and since the neural network is trying to estimate hourly bike rental it doesn't have available any parameter that might make it estimate more accurately the holiday seasons. 
+
+It overestimates during holiday seasons, it is very likely that since it is a very special date, rides are much lower than average, and since the neural network is trying to estimate hourly bike rental it doesn't have available any parameter that might make it estimate more accurately the holiday seasons.
 
 ## Unit tests
 
@@ -666,7 +665,7 @@ unittest.TextTestRunner().run(suite)
 
     .....
     ----------------------------------------------------------------------
-    Ran 5 tests in 0.000s
+    Ran 5 tests in 0.008s
     
     OK
     
